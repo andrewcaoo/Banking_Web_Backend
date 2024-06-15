@@ -71,11 +71,6 @@ async def read_user(request: Request, username: str, db: Annotated[AsyncSession,
 
     return db_user
 
-# Quan ly khach hang
-# Chi nhanh
-# Nhan vien
-
-
 # @router.patch("/user/{username}")
 # async def patch_user(
 #     request: Request,
