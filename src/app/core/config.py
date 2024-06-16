@@ -4,6 +4,7 @@ from enum import Enum
 from pydantic_settings import BaseSettings
 from starlette.config import Config
 
+# Load the env variables
 current_file_dir = os.path.dirname(os.path.realpath(__file__))
 env_path = os.path.join(current_file_dir, "..", "..", ".env")
 config = Config(env_path)

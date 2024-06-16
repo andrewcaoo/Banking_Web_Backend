@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 # access to the values within the .ini file in use.
 config = context.config
 
+# I customized configuration to connect to the Postgresql database. 
 config.set_main_option(
     "sqlalchemy.url",
     f"{settings.POSTGRES_ASYNC_PREFIX}{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@localhost/{settings.POSTGRES_DB}",

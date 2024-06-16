@@ -20,6 +20,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/login")
 
 
 async def verify_password(plain_password: str, hashed_password: str) -> bool:
+    print(hashed_password)
     correct_password: bool = bcrypt.checkpw(plain_password.encode(), hashed_password.encode())
     return correct_password
 
@@ -38,7 +39,7 @@ async def authenticate_user(username_or_email: str, password: str, db: AsyncSess
     if not db_user:
         return False
 
-    elif not await verify_password(password, db_user["hashed_password"]):
+    elif not await verify_password(password, db_user["password"]):
         return False
 
     return db_user

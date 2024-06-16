@@ -13,7 +13,7 @@ from ...crud.crud_tier import crud_tiers
 from ...crud.crud_base_account import crud_base_account
 from ...models.tier import Tier
 from ...schemas.tier import TierRead
-from ...schemas.base_account import BaseAccountRead, BaseAccountCreate, BaseAccountCreateInternal
+from ...schemas.base_account import BaseAccountRead, BaseAccountCreate, BaseAccountCreateInternal, BaseAccountUpdate, BaseAccountReadInternal
 
 router = APIRouter(tags=["base_account"])
 
@@ -56,12 +56,12 @@ async def get_base_account_users(
     return response
 
 
-@router.get("/user/me/", response_model=BaseAccountRead)
+@router.get("/base_account/me/", response_model=BaseAccountRead)
 async def get_yourself(request: Request, current_user: Annotated[BaseAccountRead, Depends(get_current_user)]) -> BaseAccountRead:
     return current_user
 
 
-@router.get("/user/{username}", response_model=BaseAccountRead)
+@router.get("/base_account/{username}", response_model=BaseAccountRead)
 async def read_user(request: Request, username: str, db: Annotated[AsyncSession, Depends(async_get_db)]) -> dict:
     db_user: BaseAccountRead | None = await crud_base_account.get(
         db=db, schema_to_select=BaseAccountRead, username=username, is_deleted=False
@@ -71,129 +71,58 @@ async def read_user(request: Request, username: str, db: Annotated[AsyncSession,
 
     return db_user
 
-# @router.patch("/user/{username}")
-# async def patch_user(
-#     request: Request,
-#     values: UserUpdate,
-#     username: str,
-#     current_user: Annotated[UserRead, Depends(get_current_user)],
-#     db: Annotated[AsyncSession, Depends(async_get_db)],
-# ) -> dict[str, str]:
-#     db_user = await crud_users.get(db=db, schema_to_select=UserRead, username=username)
-#     if db_user is None:
-#         raise NotFoundException("User not found")
+@router.patch("/base_account/{username}")
+async def patch_base_account(
+    request: Request,
+    values: BaseAccountUpdate, 
+    username: str,
+    current_user: Annotated[BaseAccountRead, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(async_get_db)],
+) -> dict[str, str]:
+    db_acc = await crud_base_account.get(db=db, schema_to_select=BaseAccountReadInternal, username=username)
+    if db_acc is None:
+        raise NotFoundException("Account not found")
 
-#     if db_user["username"] != current_user["username"]:
-#         raise ForbiddenException()
+    if db_acc["username"] != current_user["username"]:
+        raise ForbiddenException()
 
-#     if values.username != db_user["username"]:
-#         existing_username = await crud_users.exists(db=db, username=values.username)
-#         if existing_username:
-#             raise DuplicateValueException("Username not available")
+    if values.username != db_acc["username"]:
+        existing_username = await crud_base_account.exists(db=db, username=values.username)
+        if existing_username:
+            raise DuplicateValueException("Username not available")
 
-#     if values.email != db_user["email"]:
-#         existing_email = await crud_users.exists(db=db, email=values.email)
-#         if existing_email:
-#             raise DuplicateValueException("Email is already registered")
+    if values.email != db_acc["email"]:
+        existing_email = await crud_base_account.exists(db=db, email=values.email)
+        if existing_email:
+            raise DuplicateValueException("Email is already registered")
+    update_values = values.model_dump()
 
-#     await crud_users.update(db=db, object=values, username=username)
-#     return {"message": "User updated"}
+    if update_values['password'] is not None:         
+        update_values['password'] = get_password_hash(password=update_values['password'])
+    else:
+        update_values['password'] = db_acc['password']
 
+    completed_update_value = BaseAccountUpdate(**update_values)
 
-# @router.delete("/user/{username}")
-# async def erase_user(
-#     request: Request,
-#     username: str,
-#     current_user: Annotated[UserRead, Depends(get_current_user)],
-#     db: Annotated[AsyncSession, Depends(async_get_db)],
-#     token: str = Depends(oauth2_scheme),
-# ) -> dict[str, str]:
-#     db_user = await crud_users.get(db=db, schema_to_select=UserRead, username=username)
-#     if not db_user:
-#         raise NotFoundException("User not found")
-
-#     if username != current_user["username"]:
-#         raise ForbiddenException()
-
-#     await crud_users.delete(db=db, username=username)
-#     await blacklist_token(token=token, db=db)
-#     return {"message": "User deleted"}
+    await crud_base_account.update(db=db, object=completed_update_value, username=username)
+    return {"message": "Account updated"}
 
 
-# @router.delete("/db_user/{username}", dependencies=[Depends(get_current_superuser)])
-# async def erase_db_user(
-#     request: Request,
-#     username: str,
-#     db: Annotated[AsyncSession, Depends(async_get_db)],
-#     token: str = Depends(oauth2_scheme),
-# ) -> dict[str, str]:
-#     db_user = await crud_users.exists(db=db, username=username)
-#     if not db_user:
-#         raise NotFoundException("User not found")
+@router.delete("/base_account/{username}")
+async def erase_base_account(
+    request: Request,
+    username: str,
+    current_user: Annotated[BaseAccountRead, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(async_get_db)],
+    token: str = Depends(oauth2_scheme),
+) -> dict[str, str]:
+    db_acc = await crud_base_account.get(db=db, schema_to_select=BaseAccountRead, username=username)
+    if not db_acc:
+        raise NotFoundException("Account not found")
 
-#     await crud_users.db_delete(db=db, username=username)
-#     await blacklist_token(token=token, db=db)
-#     return {"message": "User deleted from the database"}
+    if username != current_user["username"]:
+        raise ForbiddenException()
 
-
-# @router.get("/user/{username}/rate_limits", dependencies=[Depends(get_current_superuser)])
-# async def read_user_rate_limits(
-#     request: Request, username: str, db: Annotated[AsyncSession, Depends(async_get_db)]
-# ) -> dict[str, Any]:
-#     db_user: dict | None = await crud_users.get(db=db, username=username, schema_to_select=UserRead)
-#     if db_user is None:
-#         raise NotFoundException("User not found")
-
-#     if db_user["tier_id"] is None:
-#         db_user["tier_rate_limits"] = []
-#         return db_user
-
-#     db_tier = await crud_tiers.get(db=db, id=db_user["tier_id"])
-#     if db_tier is None:
-#         raise NotFoundException("Tier not found")
-
-#     db_rate_limits = await crud_rate_limits.get_multi(db=db, tier_id=db_tier["id"])
-
-#     db_user["tier_rate_limits"] = db_rate_limits["data"]
-
-#     return db_user
-
-
-# @router.get("/user/{username}/tier")
-# async def read_user_tier(
-#     request: Request, username: str, db: Annotated[AsyncSession, Depends(async_get_db)]
-# ) -> dict | None:
-#     db_user = await crud_users.get(db=db, username=username, schema_to_select=UserRead)
-#     if db_user is None:
-#         raise NotFoundException("User not found")
-
-#     db_tier = await crud_tiers.exists(db=db, id=db_user["tier_id"])
-#     if not db_tier:
-#         raise NotFoundException("Tier not found")
-
-#     joined: dict = await crud_users.get_joined(
-#         db=db,
-#         join_model=Tier,
-#         join_prefix="tier_",
-#         schema_to_select=UserRead,
-#         join_schema_to_select=TierRead,
-#         username=username,
-#     )
-
-#     return joined
-
-
-# @router.patch("/user/{username}/tier", dependencies=[Depends(get_current_superuser)])
-# async def patch_user_tier(
-#     request: Request, username: str, values: UserTierUpdate, db: Annotated[AsyncSession, Depends(async_get_db)]
-# ) -> dict[str, str]:
-#     db_user = await crud_users.get(db=db, username=username, schema_to_select=UserRead)
-#     if db_user is None:
-#         raise NotFoundException("User not found")
-
-#     db_tier = await crud_tiers.get(db=db, id=values.tier_id)
-#     if db_tier is None:
-#         raise NotFoundException("Tier not found")
-
-#     await crud_users.update(db=db, object=values, username=username)
-#     return {"message": f"User {db_user['name']} Tier updated"}
+    await crud_base_account.delete(db=db, username=username)
+    await blacklist_token(token=token, db=db)
+    return {"message": "Account deleted"}

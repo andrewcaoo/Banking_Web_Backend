@@ -1,8 +1,8 @@
-"""empty message
+"""add deledted_at col
 
-Revision ID: 629de0fc3059
+Revision ID: 76a3cd7dcd24
 Revises: 
-Create Date: 2024-06-09 18:56:12.356550
+Create Date: 2024-06-16 17:42:55.401852
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '629de0fc3059'
+revision: str = '76a3cd7dcd24'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
