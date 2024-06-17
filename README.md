@@ -1,6 +1,6 @@
-<h1 align="center"> Backend source code of the banking project</h1>
+<h1 align="center"> The backend source code of the banking project</h1>
 <p align="center" markdown=1>
-  <i>The fast and convenient way to lone </i>
+  <i>The fast and convenient way to loan </i>
 </p>
 
 <p align="center">
