@@ -7,19 +7,20 @@ from ..core.config import settings
 from ..core.db.database import async_get_db
 from ..core.exceptions.http_exceptions import ForbiddenException, RateLimitException, UnauthorizedException
 from ..core.logger import logging
+from ..core.constants import account_permission
 from ..core.security import oauth2_scheme, verify_token
 from ..core.utils.rate_limit import is_rate_limited
 from ..crud.crud_rate_limit import crud_rate_limits
 from ..crud.crud_tier import crud_tiers
 from ..crud.crud_base_account import crud_base_account
-from ..models.base_account import BaseAccount 
+from ..models.base_account import BaseAccount, BaseAccountRead
 from ..schemas.rate_limit import sanitize_path
+from ..schemas.employee import EmployeeRead 
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_LIMIT = settings.DEFAULT_RATE_LIMIT_LIMIT
 DEFAULT_PERIOD = settings.DEFAULT_RATE_LIMIT_PERIOD
-
 
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)], db: Annotated[AsyncSession, Depends(async_get_db)]
@@ -99,3 +100,16 @@ async def rate_limiter(
     is_limited = await is_rate_limited(db=db, user_id=user_id, path=path, limit=limit, period=period)
     if is_limited:
         raise RateLimitException("Rate limit exceeded.")
+
+# Get current user and updated data. 
+async def verify_admin_acc(current_user: Annotated[dict, Depends(get_current_user)]) -> dict:
+    if not current_user["permission"] == account_permission["admin"]:
+        raise ForbiddenException("You do not have enough privileges.")
+
+    return current_user
+
+async def verify_admin_employee(current_user: Annotated[dict, Depends(get_current_user)]) -> dict:
+    if current_user["permission"] == account_permission["client"]:
+        raise ForbiddenException("You do not have enough privileges.")
+
+    return current_user

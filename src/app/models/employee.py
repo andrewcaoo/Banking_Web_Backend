@@ -13,7 +13,7 @@ class Employee(Base):
 
     citizen_id: Mapped[str] = mapped_column(String(30), unique=True)
     employee_name: Mapped[str] = mapped_column(String(30), index=True)
-    branch_id: Mapped[int] = mapped_column(Integer, ForeignKey("Branch.branch_id",ondelete='CASCADE'), nullable=False)
+    branch_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("Branch.branch_id",ondelete='CASCADE'), nullable=False)
     dob: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
     
     degree: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
