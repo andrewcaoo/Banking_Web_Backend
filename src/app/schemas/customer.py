@@ -7,15 +7,14 @@ from ..core.schemas import PersistentDeletion, TimestampSchema, UUIDSchema
 
 
 class CustomerBase(BaseModel):
-    branch_name:  Annotated[str, Field(min_length=5, max_length=35, pattern=r"^.{5,35}$", examples=["Ha Noi"])]
-    region_id:  Annotated[int | None, Field(examples=[1])]
-    employee_id: Annotated[int | None, Field(examples=[1])]
-    open_date: datetime
-    open_hour: Annotated[int, Field(gt=8,ls=16)] 
-    close_hour: Annotated[int, Field(gt=8,ls=16)]
+    customer_name:  Annotated[str, Field(min_length=2, max_length=35, pattern=r"^.{5,35}$", examples=["Phương Nam"])]
+    dob: datetime
+    id_number:  Annotated[str, Field(min_length=5, max_length=35, pattern=r"^\d{12}$", examples=["036093002023"])]
+    address: Annotated[str, Field(min_length=5, max_length=35, pattern=r"^.{5,300}$", examples=["123 Hang Ma Ha Noi", "456 Cho Lon HCM", "789 TP Thai Binh"])]
+    credit_score: Annotated[int, Field(ge=300, le=850, examples=[300, 600, 850])]
 
 
-class Customer(TimestampSchema, BaseAccountBase, UUIDSchema, PersistentDeletion):
+class Customer(TimestampSchema, CustomerBase, UUIDSchema, PersistentDeletion):
     # profile_image_url: Annotated[str, Field(default="hhttps://i.sstatic.net/l60Hf.png")]
     # password: str
     # permission: int = 0 
@@ -26,22 +25,21 @@ class Customer(TimestampSchema, BaseAccountBase, UUIDSchema, PersistentDeletion)
 class CustomerRead(CustomerBase):
     pass
 
-class CustomerReadInternal(CustomerBaseRead):
-    branch_id : int
+class CustomerReadInternal(CustomerRead):
+    customer_id : int
 
 class CustomerCreate(CustomerBase):
    pass
 
 
-class CustomerCreateInternal(CustomerBaseCreate):
-    created_at = datetime
-
+class CustomerCreateInternal(CustomerCreate):
+    created_at: datetime = Field(default_factory=datetime.now)
 
 class CustomerUpdate(CustomerBase):
     model_config = ConfigDict(extra="forbid")
 
 
-class CustomerUpdateInternal(CustomerBaseUpdate):
+class CustomerUpdateInternal(CustomerUpdate):
     updated_at: datetime
 
 class CustomerDelete(CustomerBase):

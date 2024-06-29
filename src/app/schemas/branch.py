@@ -11,11 +11,11 @@ class BranchBase(BaseModel):
     region_id:  Annotated[int | None, Field(examples=[1])]
     employee_id: Annotated[int | None, Field(examples=[1])]
     open_date: datetime
-    open_hour: Annotated[int, Field(gt=8,ls=16)] 
-    close_hour: Annotated[int, Field(gt=8,ls=16)]
+    open_hour: Annotated[int, Field(gt=7,ls=16,examples=[8])] 
+    close_hour: Annotated[int, Field(gt=8,ls=16,examples=[18])]
 
 
-class Branch(TimestampSchema, BaseAccountBase, UUIDSchema, PersistentDeletion):
+class Branch(TimestampSchema, BranchBase, UUIDSchema, PersistentDeletion):
     # profile_image_url: Annotated[str, Field(default="hhttps://i.sstatic.net/l60Hf.png")]
     # password: str
     # permission: int = 0 
@@ -26,22 +26,22 @@ class Branch(TimestampSchema, BaseAccountBase, UUIDSchema, PersistentDeletion):
 class BranchRead(BranchBase):
     pass
 
-class BranchReadInternal(BranchBaseRead):
+class BranchReadInternal(BranchRead):
     branch_id : int
 
 class BranchCreate(BranchBase):
    pass
 
 
-class BranchCreateInternal(BranchBaseCreate):
-    created_at = datetime
+class BranchCreateInternal(BranchCreate):
+    created_at: datetime = Field(default_factory=datetime.now)
 
 
 class BranchUpdate(BranchBase):
     model_config = ConfigDict(extra="forbid")
 
 
-class BranchUpdateInternal(BranchBaseUpdate):
+class BranchUpdateInternal(BranchUpdate):
     updated_at: datetime
 
 class BranchDelete(BranchBase):

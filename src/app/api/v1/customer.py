@@ -14,7 +14,7 @@ router = APIRouter(tags=["Customer"])
 
 
 @router.post("/customer", response_model=CustomerCreate, status_code=201)
-async def create_branch(
+async def create_customer(
     request: Request,
     new_customer:CustomerCreate, 
     db: Annotated[AsyncSession, Depends(async_get_db)],
@@ -27,58 +27,56 @@ async def create_branch(
     create_new_customer = await crud_customer.create(db=db, object=new_customer)
     return create_new_customer
 
-# @router.get("/branches",response_model=PaginatedListResponse[EmployeeRead])
-# async def get_branches(
-#     request: Request, 
-#     db: Annotated[AsyncSession, Depends(async_get_db)], 
-#     dependencies: Annotated[Depends(verify_admin_acc)],
-#     page: int = 1, 
-#     items_per_page: int = 10
-# ) -> dict:
-#     branches_data = await crud_branch.get_multi(
-#         db=db,
-#         offset=compute_offset(page, items_per_page),
-#         limit=items_per_page,
-#         schema_to_select=BranchReadInternal,
-#         is_deleted=False,
-#     )
+@router.get("/customers",response_model=PaginatedListResponse[CustomerReadInternal])
+async def get_customers(
+    request: Request, 
+    db: Annotated[AsyncSession, Depends(async_get_db)], 
+    dependencies: Annotated[None,Depends(verify_admin_employee)],
+    page: int = 1, 
+    items_per_page: int = 10
+) -> dict:
+    cus_data = await crud_customer.get_multi(
+        db=db,
+        offset=compute_offset(page, items_per_page),
+        limit=items_per_page,
+        schema_to_select=CustomerReadInternal,
+        is_deleted=False,
+    )
 
-#     response: dict[str, Any] = paginated_response(crud_data=branches_data, page=page, items_per_page=items_per_page)
-#     return response
+    response: dict[str, Any] = paginated_response(crud_data=cus_data, page=page, items_per_page=items_per_page)
+    return response
 
-# @router.get("/branch/{branch_id}", response_model=BranchRead)
-# async def get_branch_by_branch_id(
-#     request: Request, 
-#     branch_id: int, db: Annotated[AsyncSession, Depends(async_get_db)],
-#     dependencies: Annotated[Depends(verify_admin_acc)],
-#     page: int = 1, 
-#     items_per_page: int = 10
-# ) -> dict:
-#     db_branch: BranchRead | None = await crud_branch.get(
-#         db=db, 
-#         schema_to_select=BranchReadInternal,
-#         offset=compute_offset(page, items_per_page),
-#         limit=items_per_page,
-#         branch_id=branch_id, 
-#         is_deleted=False
-#     )
-#     if db_branch is None:
-#         raise NotFoundException("Branch not found")
+@router.get("/customer/{customer_id}", response_model=CustomerRead)
+async def get_customer_by_id(
+    request: Request, 
+    customer_id: int,
+    db: Annotated[AsyncSession, Depends(async_get_db)],
+    dependencies: Annotated[None,Depends(verify_admin_employee)]
+) -> dict:
+    db_cus: CustomerRead | None = await crud_customer.get(
+        db=db, 
+        schema_to_select=CustomerRead,
+        customer_id=customer_id, 
+        is_deleted=False
+    )
+    if db_cus is None:
+        raise NotFoundException("Customer not found")
 
-#     return db_branch
+    return db_cus
 
 @router.patch("/customer/{customer_id}")
 async def path_customer(
     request: Request,
     values: CustomerUpdate, 
     customer_id: int,
-    db: Annotated[AsyncSession, Depends(verify_admin_employee)],
+    dependencies: Annotated[None,Depends(verify_admin_employee)],
+    db: Annotated[AsyncSession, Depends(async_get_db)]
 ) -> dict[str, str]:
     db_customer = await crud_customer.get(db=db, schema_to_select=CustomerReadInternal, customer_id=customer_id)
     if db_customer is None:
         raise NotFoundException("Customer not found")
 
-    await db_customer.update(db=db, object=values,  customer_id=customer_id)
+    await crud_customer.update(db=db, object=values,  customer_id=customer_id)
     return {"message": "Customer updated"}
 
 
@@ -87,7 +85,7 @@ async def erase_customer(
     request: Request,
     customer_id: int,
     db: Annotated[AsyncSession, Depends(async_get_db)],
-    dependencies: Annotated[Depends(verify_admin_employee)]
+    dependencies: Annotated[None,Depends(verify_admin_employee)]
 ) -> dict[str, str]:
     db_customer = await crud_customer.get(db=db, schema_to_select=CustomerReadInternal,customer_id=customer_id)
     if not db_customer:

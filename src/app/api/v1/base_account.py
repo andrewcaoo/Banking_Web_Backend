@@ -15,7 +15,7 @@ from ...models.tier import Tier
 from ...schemas.tier import TierRead
 from ...schemas.base_account import BaseAccountRead, BaseAccountCreate, BaseAccountCreateInternal, BaseAccountUpdate, BaseAccountReadInternal
 
-router = APIRouter(tags=["base_account"])
+router = APIRouter(tags=["Base_account"])
 
 
 @router.post("/base_account", response_model=BaseAccountRead, status_code=201)

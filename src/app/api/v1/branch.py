@@ -19,17 +19,17 @@ async def create_branch(
     request: Request, 
     new_branch:BranchCreate, 
     db: Annotated[AsyncSession, Depends(async_get_db)],
-    dependencies: Annotated[Depends(verify_admin_acc)]
+    dependencies: Annotated[None,Depends(verify_admin_acc)]
 ) -> BranchRead:
 
     create_new_branch = await crud_branch.create(db=db, object=new_branch)
     return create_new_branch
 
-@router.get("/branches",response_model=PaginatedListResponse[EmployeeRead])
+@router.get("/branches",response_model=PaginatedListResponse[BranchReadInternal])
 async def get_branches(
     request: Request, 
     db: Annotated[AsyncSession, Depends(async_get_db)], 
-    dependencies: Annotated[Depends(verify_admin_acc)],
+    dependencies: Annotated[None,Depends(verify_admin_acc)],
     page: int = 1, 
     items_per_page: int = 10
 ) -> dict:
@@ -40,7 +40,6 @@ async def get_branches(
         schema_to_select=BranchReadInternal,
         is_deleted=False,
     )
-
     response: dict[str, Any] = paginated_response(crud_data=branches_data, page=page, items_per_page=items_per_page)
     return response
 
@@ -48,15 +47,11 @@ async def get_branches(
 async def get_branch_by_branch_id(
     request: Request, 
     branch_id: int, db: Annotated[AsyncSession, Depends(async_get_db)],
-    dependencies: Annotated[Depends(verify_admin_acc)],
-    page: int = 1, 
-    items_per_page: int = 10
+    dependencies: Annotated[None,Depends(verify_admin_acc)]
 ) -> dict:
     db_branch: BranchRead | None = await crud_branch.get(
         db=db, 
         schema_to_select=BranchReadInternal,
-        offset=compute_offset(page, items_per_page),
-        limit=items_per_page,
         branch_id=branch_id, 
         is_deleted=False
     )
@@ -70,14 +65,14 @@ async def patch_branch(
     request: Request,
     values: BranchUpdate, 
     branch_id: int,
-    dependencies: Annotated[Depends(verify_admin_acc)],
+    dependencies: Annotated[None,Depends(verify_admin_acc)],
     db: Annotated[AsyncSession, Depends(async_get_db)],
 ) -> dict[str, str]:
-    db_branch = await crud_employee.get(db=db, schema_to_select=BranchReadInternal, branch_id=branch_id)
+    db_branch = await crud_branch.get(db=db, schema_to_select=BranchReadInternal, branch_id=branch_id)
     if db_branch is None:
         raise NotFoundException("Branch not found")
 
-    await db_branch.update(db=db, object=values, branch_id=branch_id)
+    await crud_branch.update(db=db, object=values, branch_id=branch_id)
     return {"message": "Branch updated"}
 
 
@@ -86,7 +81,7 @@ async def erase_branch(
     request: Request,
     branch_id: int,
     db: Annotated[AsyncSession, Depends(async_get_db)],
-    dependencies: Annotated[Depends(verify_admin_acc)]
+     dependencies: Annotated[None,Depends(verify_admin_acc)]
 ) -> dict[str, str]:
     db_branch = await crud_branch.get(db=db, schema_to_select=BranchReadInternal,branch_id=branch_id)
     if not db_branch:

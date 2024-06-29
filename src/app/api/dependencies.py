@@ -13,7 +13,8 @@ from ..core.utils.rate_limit import is_rate_limited
 from ..crud.crud_rate_limit import crud_rate_limits
 from ..crud.crud_tier import crud_tiers
 from ..crud.crud_base_account import crud_base_account
-from ..models.base_account import BaseAccount, BaseAccountRead
+from ..models.base_account import BaseAccount
+from ..schemas.base_account import BaseAccountRead
 from ..schemas.rate_limit import sanitize_path
 from ..schemas.employee import EmployeeRead 
 

@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, Integer,  String, Date, Boolean, DateTime
+from sqlalchemy import ForeignKey, Integer,  String, Date, Boolean, DateTime, Float
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import UTC, datetime
 from ..core.db.database import Base
@@ -6,11 +6,11 @@ from ..core.db.database import Base
 class Loans(Base):
     __tablename__ = 'Loans'
 
-    loan_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    employee_ID: Mapped[int] = mapped_column(Integer, ForeignKey('Employee.employee_id',ondelete = 'CASCADE'), nullable=False)
-    client_account_ID: Mapped[int] = mapped_column(Integer, ForeignKey('Cus_account.cus_account_id',ondelete = 'CASCADE'),nullable=False)
-    loan_type_id: Mapped[int] = mapped_column(Integer, ForeignKey('Loan_type.loan_type_id', ondelete = 'CASCADE'), nullable=False)
-    loan_amount: Mapped[str] = mapped_column(String(50), nullable=False)
+    loan_id: Mapped[int] = mapped_column('loan_id',autoincrement=True, nullable=False, unique=True, primary_key=True, init=False)
+    employee_id: Mapped[int|None] = mapped_column(Integer, ForeignKey('Employee.employee_id', ondelete='CASCADE'), nullable=False)
+    client_account_id: Mapped[int|None] = mapped_column(Integer, ForeignKey('Cus_account.cus_account_id',ondelete = 'CASCADE'),nullable=False)
+    loan_type_id: Mapped[int|None] = mapped_column(Integer, ForeignKey('Loan_type.loan_type_id', ondelete = 'CASCADE'), nullable=False)
+    loan_amount: Mapped[float] = mapped_column(Float, nullable=False)
     submission_date: Mapped[Date] = mapped_column(Date, nullable=False)
     date_of_approval: Mapped[Date] = mapped_column(Date, nullable=False)
     expiry_date: Mapped[Date] = mapped_column(Date, nullable=False)
