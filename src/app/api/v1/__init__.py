@@ -8,6 +8,7 @@ from .employee import router as employee_router
 from .branch import router as branch_router
 from .customer import router as customer_router
 from .loan import router as loan_router
+from .region import router as region_router
 
 router = APIRouter(prefix="/v1")
 router.include_router(login_router)
@@ -17,5 +18,6 @@ router.include_router(employee_router)
 router.include_router(branch_router)
 router.include_router(customer_router)
 router.include_router(loan_router)
+router.include_router(region_router)
 # router.include_router(tiers_router)
 # router.include_router(rate_limits_router)

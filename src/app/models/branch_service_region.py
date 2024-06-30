@@ -7,8 +7,8 @@ from ..core.db.database import Base
 class BranchServiceRegion(Base):
     __tablename__ = 'Branch_service_region'
 
-    region_id : Mapped[int] =  mapped_column(Integer,ForeignKey("Region.region_id",ondelete='CASCADE'), primary_key = True )
-    branch_id : Mapped[int] =  mapped_column(Integer, ForeignKey("Branch.branch_id",ondelete='CASCADE'), primary_key = True)
+    region_id : Mapped[int|None] =  mapped_column(Integer,ForeignKey("Region.region_id",ondelete='CASCADE'), primary_key = True )
+    branch_id : Mapped[int|None] =  mapped_column(Integer, ForeignKey("Branch.branch_id",ondelete='CASCADE'), primary_key = True)
 
 
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

@@ -35,7 +35,7 @@ async def create_user(
     user_internal_dict["password"] = get_password_hash(password=user_internal_dict["password"])
     # del user_internal_dict["password"]
     
-    base_account_internal = BaseAccountCreateInternal(**user_internal_dict)
+    base_account_internal = BaseAccountCreate(**user_internal_dict)
     created_base_account = await crud_base_account.create(db=db, object=base_account_internal)
     return created_base_account
 

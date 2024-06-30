@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Annotated, Optional
+from typing import Annotated, Optional, List
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
@@ -16,24 +16,29 @@ class BranchBase(BaseModel):
 
 
 class Branch(TimestampSchema, BranchBase, UUIDSchema, PersistentDeletion):
-    # profile_image_url: Annotated[str, Field(default="hhttps://i.sstatic.net/l60Hf.png")]
-    # password: str
-    # permission: int = 0 
-    # tier_id: int | None = None
     pass
 
 # Returned value.
 class BranchRead(BranchBase):
-    pass
+    regions_list: List[int] = [] 
 
-class BranchReadInternal(BranchRead):
+class BranchReadInternal(BranchBase):
     branch_id : int
 
-class BranchCreate(BranchBase):
+class CompletedBranchRead(BranchBase):
+    regions_list: List[int] = []
+    branch_id : int
+
+class ClientBranchCreate(BranchBase):
+   regions_list: List[int] = [] 
+
+class BackendBranchCreate(BranchBase):
    pass
 
 
-class BranchCreateInternal(BranchCreate):
+
+class BranchCreateInternal(BranchBase):
+    branch_id : int
     created_at: datetime = Field(default_factory=datetime.now)
 
 
