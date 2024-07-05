@@ -9,6 +9,9 @@ from .branch import router as branch_router
 from .customer import router as customer_router
 from .loan import router as loan_router
 from .region import router as region_router
+from .payment import router as payment_router
+from .cus_account import router as cus_account_router
+from .loan_type import router as loan_type_router
 
 router = APIRouter(prefix="/v1")
 router.include_router(login_router)
@@ -19,5 +22,6 @@ router.include_router(branch_router)
 router.include_router(customer_router)
 router.include_router(loan_router)
 router.include_router(region_router)
-# router.include_router(tiers_router)
-# router.include_router(rate_limits_router)
+router.include_router(payment_router)
+router.include_router(cus_account_router)
+router.include_router(loan_type_router)

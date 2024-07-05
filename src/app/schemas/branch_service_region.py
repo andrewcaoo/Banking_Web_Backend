@@ -25,6 +25,8 @@ class BranchSRCreate(BranchSRBase):
    regions_list: List[int] = [] 
    pass
 
+class regionsList(BaseModel):
+    region_id: int
 
 class BranchSRCreateInternal(BranchSRCreate):
     created_at: datetime = Field(default_factory=datetime.now)

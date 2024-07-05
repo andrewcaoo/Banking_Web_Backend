@@ -11,9 +11,12 @@ class Customer(Base):
     customer_id: Mapped[int] = mapped_column("customer_id", autoincrement=True, nullable=False, unique=True, primary_key=True, init=False)
 
     customer_name: Mapped[str] = mapped_column(String(35), nullable=False)
-    dob: Mapped[Date] = mapped_column(Date, nullable=False)
+    dob: Mapped[Date] = mapped_column(Date, nullable=True)
     id_number: Mapped[str] = mapped_column(String(12), nullable=False)
-    address: Mapped[str] = mapped_column(String, nullable=False) 
+    address: Mapped[str] = mapped_column(String, nullable=True) 
+    front_of_id_card: Mapped[str] = mapped_column(String, nullable=True)
+    back_of_id_card: Mapped[str] = mapped_column(String, nullable=True)
+    face_video: Mapped[str] = mapped_column(String, nullable=True)
     credit_score: Mapped[int] = mapped_column(Integer, nullable=False, default=500)
 
 

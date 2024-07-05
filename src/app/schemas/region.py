@@ -25,6 +25,7 @@ class RegionCreate(RegionBase):
 
 
 class RegionCreateInternal(RegionCreate):
+    region_id : int
     created_at: datetime = Field(default_factory=datetime.now)
 
 

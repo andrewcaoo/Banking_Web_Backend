@@ -7,5 +7,10 @@ from fastcrud.exceptions.http_exceptions import (
     UnauthorizedException,
     UnprocessableEntityException,
     DuplicateValueException,
-    RateLimitException,
+    RateLimitException
 )
+from fastapi import HTTPException
+class ServerErrorException(HTTPException):
+    def __init__(self, value: str):
+        self.value = value
+        super().__init__(status_code=500, detail="The server is having an error!")

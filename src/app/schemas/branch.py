@@ -35,14 +35,13 @@ class ClientBranchCreate(BranchBase):
 class BackendBranchCreate(BranchBase):
    pass
 
-
-
 class BranchCreateInternal(BranchBase):
     branch_id : int
     created_at: datetime = Field(default_factory=datetime.now)
 
 
 class BranchUpdate(BranchBase):
+    regions_list: List[int] = []
     model_config = ConfigDict(extra="forbid")
 
 
