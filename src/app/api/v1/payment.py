@@ -8,8 +8,12 @@ from ...core.db.database import async_get_db
 from ...core.exceptions.http_exceptions import DuplicateValueException, ForbiddenException, NotFoundException, ServerErrorException
 from ...core.security import blacklist_token, get_password_hash, oauth2_scheme
 from ...crud.crud_payment import crud_payment 
+from ...crud.crud_loan import crud_loan
+from ...schemas.loan import LoanReadInternal
 from ...schemas.payment import PaymentRead, PaymentCreate, PaymentCreateInternal, PaymentUpdate, PaymentUpdateInternal, PaymentReadInternal
 from ..dependencies import verify_admin_employee, verify_admin_acc
+from ...core.constants import payment_type, interest_type
+from ..helper import convert_interest_by_interest_each_month
 
 router = APIRouter(tags=["Payment"])
 
@@ -27,8 +31,63 @@ async def create_payment(
         print(e)
         raise ServerErrorException(str(e))
 
+@router.post("/create_payment_for_loan/{loan_id}", response_model=PaginatedListResponse[PaymentReadInternal], status_code=201)
+async def create_payment_for_loan(
+    request: Request,
+    loan_id: int,
+    db: Annotated[AsyncSession, Depends(async_get_db)],
+    dependencies: Annotated[None,Depends(verify_admin_employee)]
+) -> PaymentReadInternal: 
+    try:
+        loan_data = await crud_loan.get(db=db,loan_id=loan_id)
+        if loan_data is None:
+            raise NotFoundException()
+
+        # created_new_payment = await crud_payment.create(db=db, object=new_payment)
+        # total_amount 
+        # total_amoutn -> payment_type
+        #  payment_type = 1: just pay the amount from the interest
+        #  payment_type = 2: pay amount from the interest and principal
+        payment_sequential = []
+        if loan_data['payment_type'] == payment_type['fixed_interest']:
+            for i in range(loan_data['number_of_terms']-1):
+                new_payment = {}
+                new_payment['total_amount'] = loan_data['interest'] * loan_data['loan_amount']
+                new_payment['loan_id'] = loan_id
+                new_payment['status'] = 0
+                created_new_payment = await crud_payment.create(db=db, object=PaymentCreate(**new_payment))
+                payment_sequential.append(created_new_payment)
+            new_payment = {}
+            new_payment['total_amount'] = loan_data['interest'] * loan_data['loan_amount'] + loan_data['loan_amount']
+            new_payment['loan_id'] = loan_id
+            new_payment['status'] = 0
+            payment_sequential.append(await crud_payment.create(db=db, object=new_payment))
+        else:
+            # interest for each month * to the number of months 
+            stand_amount_each_term = loan_data['loan_amount'] / loan_data['number_of_terms'] 
+            cur_debt = loan_data['loan_amount']
+            interest_each_term = convert_interest_by_interest_each_month(loan_data['interest'],interest_type['each_year']) * (loan_data['duration'] / loan_data['number_of_terms'])
+            for i in range(loan_data['number_of_terms']):
+                new_payment = {}
+                new_payment['total_amount'] = stand_amount_each_term + interest_each_term * cur_debt
+                new_payment['loan_id'] = loan_id
+                new_payment['status'] = 0
+                created_new_payment = await crud_payment.create(db=db, object=new_payment)
+                payment_sequential.append(created_new_payment)
+
+                cur_debt -= stand_amount_each_term
+
+        response: dict[str, Any] = paginated_response(crud_data=payment_sequential, page=1, items_per_page=10)
+        return response
+    except NotFoundException:
+        raise NotFoundException("Loan not found")
+    except Exception as e:
+        print(e)
+        raise ServerErrorException(str(e))
+
 @router.get("/payments",response_model=PaginatedListResponse[PaymentReadInternal])
 async def get_payment(
+
     request: Request, 
     db: Annotated[AsyncSession, Depends(async_get_db)], 
     dependencies: Annotated[None,Depends(verify_admin_employee)],
@@ -60,7 +119,7 @@ async def get_payment_by_id(
     items_per_page: int = 10
 ) -> dict:
     try:
-        payment_data = await crud_payment.get_multi_by_id(
+        payment_data = await crud_payment.get_multi(
             db=db,
             offset=compute_offset(page, items_per_page),
             limit=items_per_page,

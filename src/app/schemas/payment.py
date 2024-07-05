@@ -10,8 +10,7 @@ class PaymentBase(BaseModel):
     total_amount: Annotated[float | None, Field(examples=[1000000])]
     loan_id: Annotated[int | None, Field(examples=[1])]
     end_date: datetime
-    
-
+    status_code: Annotated[int, Field(examples=[1], default=1)] 
 
 class Payment(TimestampSchema, PaymentBase, UUIDSchema, PersistentDeletion):
     pass
