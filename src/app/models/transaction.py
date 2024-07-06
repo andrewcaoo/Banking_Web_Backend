@@ -12,7 +12,8 @@ class Transaction(Base):
     date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     amount: Mapped[float] = mapped_column(Float, nullable=False)
     payment_id: Mapped[int] = mapped_column(Integer, ForeignKey('Payment.payment_id',ondelete='CASCADE'), nullable=False)
-    method: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    method: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    status: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
 
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)

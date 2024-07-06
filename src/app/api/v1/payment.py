@@ -3,6 +3,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Request
 from fastcrud.paginated import PaginatedListResponse, compute_offset, paginated_response
 from sqlalchemy.ext.asyncio import AsyncSession
+from dateutil.relativedelta import relativedelta
 
 from ...core.db.database import async_get_db
 from ...core.exceptions.http_exceptions import DuplicateValueException, ForbiddenException, NotFoundException, ServerErrorException
@@ -12,7 +13,7 @@ from ...crud.crud_loan import crud_loan
 from ...schemas.loan import LoanReadInternal
 from ...schemas.payment import PaymentRead, PaymentCreate, PaymentCreateInternal, PaymentUpdate, PaymentUpdateInternal, PaymentReadInternal
 from ..dependencies import verify_admin_employee, verify_admin_acc
-from ...core.constants import payment_type, interest_type
+from ...core.constants import payment_type, interest_type, payment_status
 from ..helper import convert_interest_by_interest_each_month
 
 router = APIRouter(tags=["Payment"])
@@ -48,35 +49,51 @@ async def create_payment_for_loan(
         # total_amoutn -> payment_type
         #  payment_type = 1: just pay the amount from the interest
         #  payment_type = 2: pay amount from the interest and principal
-        payment_sequential = []
+
+        months_of_a_term = loan_data['duration'] / loan_data['number_of_terms']
         if loan_data['payment_type'] == payment_type['fixed_interest']:
+            date_pivot = loan_data['date_of_approval']
+
             for i in range(loan_data['number_of_terms']-1):
+                date_pivot += relativedelta(months=+(months_of_a_term))
                 new_payment = {}
-                new_payment['total_amount'] = loan_data['interest'] * loan_data['loan_amount']
+
+                new_payment['total_amount'] = loan_data['interest'] * loan_data['loan_amount'] * 0.01
                 new_payment['loan_id'] = loan_id
-                new_payment['status'] = 0
+                new_payment['status'] = payment_status['pending']
+                new_payment['end_date'] = date_pivot
+
                 created_new_payment = await crud_payment.create(db=db, object=PaymentCreate(**new_payment))
-                payment_sequential.append(created_new_payment)
+
             new_payment = {}
-            new_payment['total_amount'] = loan_data['interest'] * loan_data['loan_amount'] + loan_data['loan_amount']
+            date_pivot += relativedelta(months=+((i+1)*(months_of_a_term)))
+
+            new_payment['total_amount'] = loan_data['interest'] * loan_data['loan_amount']*0.01 + loan_data['loan_amount']
             new_payment['loan_id'] = loan_id
-            new_payment['status'] = 0
-            payment_sequential.append(await crud_payment.create(db=db, object=new_payment))
+            new_payment['status'] = payment_status['pending']
+            new_payment['end_date'] = date_pivot
+
+            await crud_payment.create(db=db, object=PaymentCreate(**new_payment))
         else:
             # interest for each month * to the number of months 
+            date_pivot = loan_data['date_of_approval']
             stand_amount_each_term = loan_data['loan_amount'] / loan_data['number_of_terms'] 
             cur_debt = loan_data['loan_amount']
             interest_each_term = convert_interest_by_interest_each_month(loan_data['interest'],interest_type['each_year']) * (loan_data['duration'] / loan_data['number_of_terms'])
             for i in range(loan_data['number_of_terms']):
                 new_payment = {}
-                new_payment['total_amount'] = stand_amount_each_term + interest_each_term * cur_debt
+                date_pivot += relativedelta(months=+(months_of_a_term))
+
+                new_payment['total_amount'] = stand_amount_each_term + interest_each_term * cur_debt*0.01
                 new_payment['loan_id'] = loan_id
-                new_payment['status'] = 0
-                created_new_payment = await crud_payment.create(db=db, object=new_payment)
-                payment_sequential.append(created_new_payment)
+                new_payment['status'] = ayment_status['pending']
+                new_payment['end_date'] = date_pivot
+
+                created_new_payment = await crud_payment.create(db=db, object=PaymentCreate(**new_payment))
 
                 cur_debt -= stand_amount_each_term
 
+        payment_sequential = await crud_payment.get_multi(db=db, loan_id=loan_id, schema_to_select=PaymentReadInternal, is_deleted=False)
         response: dict[str, Any] = paginated_response(crud_data=payment_sequential, page=1, items_per_page=10)
         return response
     except NotFoundException:

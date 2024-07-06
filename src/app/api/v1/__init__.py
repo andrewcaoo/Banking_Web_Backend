@@ -12,6 +12,9 @@ from .region import router as region_router
 from .payment import router as payment_router
 from .cus_account import router as cus_account_router
 from .loan_type import router as loan_type_router
+from .transaction import router as transaction_router
+from .online_transaction import router as online_transaction_router
+
 
 router = APIRouter(prefix="/v1")
 router.include_router(login_router)
@@ -25,3 +28,5 @@ router.include_router(region_router)
 router.include_router(payment_router)
 router.include_router(cus_account_router)
 router.include_router(loan_type_router)
+router.include_router(transaction_router)
+router.include_router(online_transaction_router)

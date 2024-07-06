@@ -114,3 +114,9 @@ async def verify_admin_employee(current_user: Annotated[dict, Depends(get_curren
         raise ForbiddenException("You do not have enough privileges.")
 
     return current_user
+
+async def login_require(current_user: Annotated[dict, Depends(get_current_user)]) -> dict:
+    if current_user["permission"] != account_permission["client"] and current_user["permission"] != account_permission["admin"] and current_user["permission"] != account_permission["employee"]:
+        raise ForbiddenException("You do not have enough privileges.")
+
+    return current_user

@@ -14,3 +14,22 @@ interest_type = {
     'each_quarter': 2,
     'each_year': 3
 }
+
+payment_status = {
+    'pending': 1,
+    'processing': 2,
+    'completed': 3
+}
+
+transaction_method = {
+    'online': 1,
+    'atm': 2,
+    'cash': 3
+}
+
+transaction_status = {
+    'prepare': 1,
+    'processing': 2,
+    'completed': 3,
+    'failure': 4
+}

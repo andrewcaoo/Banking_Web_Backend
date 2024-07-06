@@ -12,6 +12,7 @@ class Payment(Base):
     total_amount: Mapped[float] = mapped_column(Float, nullable=False)
     loan_id: Mapped[int] = mapped_column(Integer, ForeignKey('Loans.loan_id', ondelete = 'CASCADE'), nullable=False)
     end_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    status: Mapped[int] = mapped_column(Integer, nullable=False)
 
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
