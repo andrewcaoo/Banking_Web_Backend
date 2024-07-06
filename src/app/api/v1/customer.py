@@ -57,10 +57,10 @@ async def get_customers(
         print(str(e))
         raise ServerErrorException(str(e))
 
-@router.get("/customer/{customer_id}", response_model=CustomerRead)
+@router.get("/customer/{id_number}", response_model=CustomerRead)
 async def get_customer_by_id(
     request: Request, 
-    customer_id: int,
+    id_number: int,
     db: Annotated[AsyncSession, Depends(async_get_db)],
     dependencies: Annotated[None,Depends(verify_admin_employee)]
 ) -> dict:
@@ -68,7 +68,7 @@ async def get_customer_by_id(
         db_cus: CustomerRead | None = await crud_customer.get(
             db=db, 
             schema_to_select=CustomerRead,
-            customer_id=customer_id, 
+            id_number=id_number, 
             is_deleted=False
         )
         if db_cus is None:
