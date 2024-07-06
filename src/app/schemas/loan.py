@@ -11,7 +11,7 @@ class LoanBase(BaseModel):
     loan_amount: Annotated[float, Field(gt=0, examples=[1000000])]
     duration: Annotated[int, Field(gt=6, examples=[24])]
     number_of_terms: Annotated[int,Field(gte=1, examples=[2])]
-    status:Annotated[int, Field(examples=[0], default=0)]
+    status:Annotated[int, Field(examples=[1], default=1)]
     proof: Annotated[str, Field(min_length=5, max_length=35, pattern=r"^.{5,300}$", examples=["https://i.sstatic.net/l60Hf.png"], default="https://i.sstatic.net/l60Hf.png")]
     payment_type: Annotated[int, Field(examples=[1])]
     interest: Annotated[float, Field(gt=0, examples=[30])]
@@ -52,6 +52,8 @@ class LoanCreateInternal(LoanCreate):
 class LoanUpdate(LoanBase):
     model_config = ConfigDict(extra="forbid")
 
+class LoanStatusUpdate(BaseModel):
+    status:Annotated[int, Field(examples=[1], default=1)]
 
 class LoanUpdateInternal(LoanUpdate):
     updated_at: datetime

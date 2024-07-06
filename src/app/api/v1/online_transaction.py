@@ -67,7 +67,7 @@ async def get_order(
             'vnp_TxnRef': order_id,
             'vnp_OrderInfo': values.order_description,
             'vnp_OrderType': values.order_type,
-            'vnp_Amount': int(values.amount) * 100,  # Convert to integer amount in cents
+            'vnp_Amount': (int(values.amount)*1000000) * 100,  # Convert to integer amount in cents
             'vnp_ReturnUrl': return_url,
             'vnp_CreateDate': create_date,
             'vnp_IpAddr': '127.0.0.1',  # Replace with actual IP address
@@ -101,7 +101,7 @@ async def get_order(
             vnp.responseData = inputData
 
             order_id = inputData.get('vnp_TxnRef', '')
-            amount = float(inputData.get('vnp_Amount', 0)) / 100
+            amount = (float(inputData.get('vnp_Amount', 0))/1000000) / 100
             order_desc = inputData.get('vnp_OrderInfo', '')
             vnp_TransactionNo = inputData.get('vnp_TransactionNo', '')
             vnp_ResponseCode = inputData.get('vnp_ResponseCode', '')
@@ -114,10 +114,10 @@ async def get_order(
             transaction_id = int(order_id.split('-')[0])
 
             global values
+            db_tran = await crud_transaction.get(db=db, schema_to_select=TransactionReadInternal, transaction_id=transaction_id)
+            if db_tran is None:
+                raise NotFoundException()
             if vnp.validate_response(secret_key):
-                db_tran = await crud_transaction.get(db=db, schema_to_select=TransactionReadInternal, transaction_id=transaction_id)
-                if db_tran is None:
-                    raise NotFoundException()
                 if vnp_ResponseCode == "00":
                     values = {
                         'status': transaction_status['completed'],
@@ -125,7 +125,7 @@ async def get_order(
                         'amount': amount,
                         'payment_id': int(order_id.split('-')[1])
                     }
-
+                    await crud_transaction.update(db=db, object=TransactionUpdate(**values), transaction_id=transaction_id)
                     return JSONResponse({
                         "title": "Kết quả thanh toán",
                         "result": "Thành công",
@@ -135,7 +135,7 @@ async def get_order(
                         "vnp_TransactionNo": vnp_TransactionNo,
                         "vnp_ResponseCode": vnp_ResponseCode
                     })
-                    await crud_transaction.update(db=db, object=TransactionUpdate(**values), transaction_id=transaction_id)
+                    
                 else:
                     values = {
                         'status': transaction_status['failure'],

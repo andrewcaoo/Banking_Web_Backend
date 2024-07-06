@@ -18,7 +18,8 @@ interest_type = {
 payment_status = {
     'pending': 1,
     'processing': 2,
-    'completed': 3
+    'completed': 3,
+    'expired': 4,
 }
 
 transaction_method = {
@@ -32,4 +33,14 @@ transaction_status = {
     'processing': 2,
     'completed': 3,
     'failure': 4
+}
+
+loan_status = {
+    'submitted': 1,
+    'reviewed': 2,
+    'approved': 3,
+    'rejected': 4,
+    'disbursed': 5,
+    'bad_debt': 6,
+    'completed': 7
 }

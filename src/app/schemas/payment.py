@@ -32,6 +32,8 @@ class PaymentCreateInternal(PaymentCreate):
 class PaymentUpdate(PaymentBase):
     model_config = ConfigDict(extra="forbid")
 
+class PaymentStatusUpdate(BaseModel):
+    status: Annotated[int, Field(examples=[1], default=1)] 
 
 class PaymentUpdateInternal(PaymentUpdate):
     updated_at: datetime

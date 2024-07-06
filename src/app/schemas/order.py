@@ -7,7 +7,7 @@ from ..core.schemas import PersistentDeletion, TimestampSchema, UUIDSchema
 
 
 class Order(BaseModel):
-    amount: Annotated[float, Field(gt=0, examples=[5000000])]
+    amount: Annotated[float, Field(gt=0, examples=[50])]
     bank_code: Annotated[str, Field(examples=[""])]
     order_description: Annotated[str, Field(examples=[""])]
     order_type: Annotated[str, Field(examples=['topup'])]
