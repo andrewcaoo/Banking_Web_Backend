@@ -86,11 +86,11 @@ async def create_payment_for_loan(
 
                 new_payment['total_amount'] = stand_amount_each_term + interest_each_term * cur_debt*0.01
                 new_payment['loan_id'] = loan_id
-                new_payment['status'] = ayment_status['pending']
+                new_payment['status'] = payment_status['pending']
                 new_payment['end_date'] = date_pivot
 
                 created_new_payment = await crud_payment.create(db=db, object=PaymentCreate(**new_payment))
-
+                
                 cur_debt -= stand_amount_each_term
 
         payment_sequential = await crud_payment.get_multi(db=db, loan_id=loan_id, schema_to_select=PaymentReadInternal, is_deleted=False)

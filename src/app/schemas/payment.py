@@ -8,7 +8,7 @@ from ..core.schemas import PersistentDeletion, TimestampSchema, UUIDSchema
 
 class PaymentBase(BaseModel):
     total_amount: Annotated[float | None, Field(examples=[1000000])]
-    payment_id: Annotated[int | None, Field(examples=[1])]
+    loan_id: Annotated[int | None, Field(examples=[1])]
     end_date: datetime
     status: Annotated[int, Field(examples=[1], default=1)] 
 
