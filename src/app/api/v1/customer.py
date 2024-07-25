@@ -57,17 +57,17 @@ async def get_customers(
         print(str(e))
         raise ServerErrorException(str(e))
 
-@router.get("/customer/{id_number}", response_model=CustomerRead)
+@router.get("/customer/{id_number}", response_model=CustomerReadInternal)
 async def get_customer_by_id(
     request: Request, 
-    id_number: int,
+    id_number: str,
     db: Annotated[AsyncSession, Depends(async_get_db)],
-    dependencies: Annotated[None,Depends(verify_admin_employee)]
+    # dependencies: Annotated[None,Depends(verify_admin_employee)]
 ) -> dict:
     try:
-        db_cus: CustomerRead | None = await crud_customer.get(
+        db_cus= await crud_customer.get(
             db=db, 
-            schema_to_select=CustomerRead,
+            schema_to_select=CustomerReadInternal,
             id_number=id_number, 
             is_deleted=False
         )

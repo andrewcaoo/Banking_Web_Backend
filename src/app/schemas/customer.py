@@ -16,11 +16,11 @@ class Customer(TimestampSchema, CustomerBase, UUIDSchema, PersistentDeletion):
 # Returned value.
 class CustomerRead(CustomerBase):
     dob: Annotated[datetime| None, Field(default=None)]
-    address: Annotated[str | None, Field(min_length=5, max_length=35, pattern=r"^.{5,300}$", examples=["123 Hang Ma Ha Noi", "456 Cho Lon HCM", "789 TP Thai Binh"])]
+    address: Annotated[str | None, Field(min_length=5, max_length=300, pattern=r"^.{5,300}$", examples=["123 Hang Ma Ha Noi", "456 Cho Lon HCM", "789 TP Thai Binh"])]
     credit_score: Annotated[int | None, Field(ge=300, le=850, examples=[300, 600, 850])]
-    front_of_id_card: Annotated[str | None, Field(min_length=5, max_length=35, pattern=r"^.{5,300}$", examples=["https://i.sstatic.net/l60Hf.png"])]
-    back_of_id_card: Annotated[str | None, Field(min_length=5, max_length=35, pattern=r"^.{5,300}$", examples=["https://i.sstatic.net/l60Hf.png"])]
-    face_video: Annotated[str | None, Field(min_length=5, max_length=35, pattern=r"^.{5,300}$", examples=["https://i.sstatic.net/l60Hf.png"])]
+    front_of_id_card: Annotated[str | None, Field(examples=["https://i.sstatic.net/l60Hf.png"])]
+    back_of_id_card: Annotated[str | None, Field(examples=["https://i.sstatic.net/l60Hf.png"])]
+    face_video: Annotated[str | None, Field(examples=["https://i.sstatic.net/l60Hf.png"])]
 
 class CustomerReadInternal(CustomerRead):
     customer_id : int
@@ -29,9 +29,9 @@ class CustomerCreate(CustomerBase):
     dob: Annotated[datetime| None, Field(default=None)]
     address: Annotated[str | None, Field(min_length=5, max_length=35, pattern=r"^.{5,300}$", examples=["123 Hang Ma Ha Noi", "456 Cho Lon HCM", "789 TP Thai Binh"])]
     credit_score: Annotated[int | None, Field(ge=300, le=850, examples=[300, 600, 850])]
-    front_of_id_card: Annotated[str | None, Field(min_length=5, max_length=35, pattern=r"^.{5,300}$", examples=["https://i.sstatic.net/l60Hf.png"])]
-    back_of_id_card: Annotated[str | None, Field(min_length=5, max_length=35, pattern=r"^.{5,300}$", examples=["https://i.sstatic.net/l60Hf.png"])]
-    face_video: Annotated[str | None, Field(min_length=5, max_length=35, pattern=r"^.{5,300}$", examples=["https://i.sstatic.net/l60Hf.png"])]
+    front_of_id_card: Annotated[str | None, Field(examples=["https://i.sstatic.net/l60Hf.png"])]
+    back_of_id_card: Annotated[str | None, Field(examples=["https://i.sstatic.net/l60Hf.png"])]
+    face_video: Annotated[str | None, Field(examples=["https://i.sstatic.net/l60Hf.png"])]
 
 
 class CustomerCreateInternal(CustomerCreate):
@@ -42,9 +42,9 @@ class CustomerUpdate(CustomerBase):
     dob: Annotated[datetime, Field(default=None)]
     address: Annotated[str , Field(min_length=5, max_length=35, pattern=r"^.{5,300}$", examples=["123 Hang Ma Ha Noi", "456 Cho Lon HCM", "789 TP Thai Binh"])]
     credit_score: Annotated[int, Field(ge=300, le=850, examples=[300, 600, 850])]
-    front_of_id_card: Annotated[str, Field(min_length=5, max_length=35, pattern=r"^.{5,300}$", examples=["https://i.sstatic.net/l60Hf.png"])]
-    back_of_id_card: Annotated[str, Field(min_length=5, max_length=35, pattern=r"^.{5,300}$", examples=["https://i.sstatic.net/l60Hf.png"])]
-    face_video: Annotated[str, Field(min_length=5, max_length=35, pattern=r"^.{5,300}$", examples=["https://i.sstatic.net/l60Hf.png"])]
+    front_of_id_card: Annotated[str, Field(examples=["https://i.sstatic.net/l60Hf.png"])]
+    back_of_id_card: Annotated[str, Field(examples=["https://i.sstatic.net/l60Hf.png"])]
+    face_video: Annotated[str, Field(examples=["https://i.sstatic.net/l60Hf.png"])]
 
 
 class CustomerUpdateInternal(CustomerUpdate):

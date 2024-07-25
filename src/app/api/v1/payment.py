@@ -55,6 +55,7 @@ async def create_payment_for_loan(
             date_pivot = loan_data['date_of_approval']
 
             for i in range(loan_data['number_of_terms']-1):
+                print('-->',relativedelta(months=+(months_of_a_term)))
                 date_pivot += relativedelta(months=+(months_of_a_term))
                 new_payment = {}
 

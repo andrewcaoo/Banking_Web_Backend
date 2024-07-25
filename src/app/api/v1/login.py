@@ -23,12 +23,12 @@ router = APIRouter(tags=["login"])
 @router.post("/login", response_model=Token)
 async def login_for_access_token(
     response: Response,
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    db: Annotated[AsyncSession, Depends(async_get_db)],
-) -> dict[str, str]:
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: AsyncSession = Depends(async_get_db)
+) -> dict:
     user = await authenticate_user(username_or_email=form_data.username, password=form_data.password, db=db)
     if not user:
-        raise UnauthorizedException("Wrong username, email or password.")
+        raise HTTPException(status_code=401, detail="Wrong username, email or password.")
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = await create_access_token(data={"sub": user["username"]}, expires_delta=access_token_expires)
@@ -39,8 +39,7 @@ async def login_for_access_token(
     response.set_cookie(
         key="refresh_token", value=refresh_token, httponly=True, secure=True, samesite="Lax", max_age=max_age
     )
-
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"user_id": user["base_account_id"],"access_token": access_token, "token_type": "bearer"}
 
 
 @router.post("/refresh")
